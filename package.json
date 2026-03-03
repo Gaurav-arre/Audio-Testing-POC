@@ -1,0 +1,26 @@
+{
+  "name": "auphonic-poc",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "compile": "cp .env ./dist/.env 2>/dev/null || true && npx tsc",
+    "start": "npm run compile && node ./dist/index.js",
+    "build": "npx tsc",
+    "dev": "nodemon"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.686.0",
+    "@aws-sdk/s3-request-presigner": "^3.686.0",
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.9.0",
+    "nodemon": "^3.1.14",
+    "typescript": "^5.7.3"
+  }
+}
