@@ -1,8 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import {
-  createPresignedGetUrl,
-  getFirstObjectKey,
-} from '../utils/s3Util.js';
+import { createPresignedGetUrl } from '../utils/s3Util.js';
 import {
   startAuphonicProduction,
   getAuphonicProductionDetails,
@@ -42,13 +39,14 @@ const router = Router();
  */
 router.post('/start-production-first-file', async (req: Request, res: Response) => {
   try {
-    const prefix = (req.body?.prefix as string) || DEFAULT_S3_PREFIX;
-    const s3Key = await getFirstObjectKey(prefix);
-    if (!s3Key) {
-      res.status(404).json({ error: `No objects found in prefix: ${prefix}` });
+    const filename = (req.body?.filename as string)?.trim();
+    if (!filename) {
+      res.status(400).json({ error: 'Body parameter "filename" is required' });
       return;
     }
-    logInfo('Using first file from S3', { prefix, s3Key });
+    const prefix = (req.body?.prefix as string) || DEFAULT_S3_PREFIX;
+    const s3Key = `${prefix.replace(/\/?$/, '/')}${filename.replace(/^\//, '')}`;
+    logInfo('Using file from S3', { filename, s3Key });
 
     const presignedGetUrl = await createPresignedGetUrl(s3Key); // TODO: use the presigned URL to start the production
     const result = await startAuphonicProduction({
