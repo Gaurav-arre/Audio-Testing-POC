@@ -48,6 +48,8 @@ router.post('/start-production-first-file', async (req: Request, res: Response) 
     const s3Key = `${prefix.replace(/\/?$/, '/')}${filename.replace(/^\//, '')}`;
     logInfo('Using file from S3', { filename, s3Key });
 
+    const startTime = Date.now();
+
     const presignedGetUrl = await createPresignedGetUrl(s3Key); // TODO: use the presigned URL to start the production
     const result = await startAuphonicProduction({
       inputFileUrl: presignedGetUrl,
@@ -83,18 +85,24 @@ router.post('/start-production-first-file', async (req: Request, res: Response) 
     );
     files.push({ type: 'processed', path: processedPath, filename: primaryFile.filename });
 
+    const timeTakenMs = Date.now() - startTime;
+
     logInfo('Downloaded original and processed files locally', {
       productionUuid,
       files,
+      timeTakenMs,
     });
 
+    const timeFormatted = `${(timeTakenMs / 1000).toFixed(2)}s`;
     res.json({
       productionUuid,
       sourceS3Key: s3Key,
       status: 'done',
       files,
+      timeTakenMs,
+      timeTakenFormatted: timeFormatted,
       message:
-        'Downloaded original from S3 and processed from Auphonic to local output/ folder',
+        `Downloaded original from S3 and processed from Auphonic to local output/ folder. Conversion took ${timeFormatted}`,
     });
   } catch (err) {
     const e = err as Error;
